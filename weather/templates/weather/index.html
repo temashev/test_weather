@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Поиск погоды</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <script>
+        $(function() {
+            $("#id_city_name").autocomplete({
+                source: "{% url 'autocomplete_city' %}",
+                minLength: 2,
+            });
+        });
+
+        function searchCity(cityName) {
+            $('#id_city_name').val(cityName);
+            $('form').submit();
+        }
+    </script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding: 20px;
+        }
+        .weather-info {
+            margin-top: 20px;
+        }
+        .search-history {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #ffffff;
+        }
+        .search-history ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .search-history li {
+            margin-bottom: 10px;
+        }
+        .search-history a {
+            text-decoration: none;
+            color: #007bff;
+        }
+        .search-history a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="my-4">Поиск погоды</h1>
+        <form method="post" class="form-inline">
+            {% csrf_token %}
+            <div class="form-group mb-2">
+                {{ form.city_name }}
+            </div>
+            <button type="submit" class="btn btn-primary mb-2 ml-2">Поиск</button>
+        </form>
+
+        <div class="weather-info">
+            {% if weather_data %}
+                <h2>Данные о погоде</h2>
+                <p><strong>Дата:</strong> {{ weather_data.date }}</p>
+                <p><strong>Минимальная температура:</strong> {{ weather_data.temperature_min }}°C</p>
+                <p><strong>Максимальная температура:</strong> {{ weather_data.temperature_max }}°C</p>
+                <p><strong>Условия:</strong> {{ weather_data.weather }}</p>
+                <p><strong>Скорость ветра:</strong> {{ weather_data.wind_speed }} м/с</p>
+            {% else %}
+                <p>Данные о погоде недоступны.</p>
+            {% endif %}
+        </div>
+
+        <div class="search-history">
+            <h2>История поиска</h2>
+            <ul>
+                {% for city in search_history %}
+                    <li>
+                        <a href="javascript:void(0);" onclick="searchCity('{{ city.city_name }}');">
+                            {{ city.city_name }} ({{ city.search_count }} раз)
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
